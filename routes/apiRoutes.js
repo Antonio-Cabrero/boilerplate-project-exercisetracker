@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const User = require("../models/User");
 
 // GET
 router.get("/users", (req, res) => {
@@ -22,9 +23,18 @@ router.get("/users/:_id/logs", (req, res) => {
 });
 
 // POST
-router.post("/users", (req, res) => {
+router.post("/users", async (req, res) => {
 	// create new user
-	res.json({ username: req.body.url, _id: 1 });
+	let user = await User.findOne({ username: req.body.username });
+	if (user) {
+		return res.status(400).json({ error: "Username already taken" });
+	} else {
+		user = new User({
+			username: req.body.username,
+		});
+		await user.save();
+		res.json({ username: user.username, _id: user._id });
+	}
 });
 
 router.post("/users/:_id/exercises", (req, res) => {

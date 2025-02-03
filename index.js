@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const bodyparser = require("body-parser");
 const connectDB = require("./server");
+const apiRoutes = require("./routes/apiRoutes");
 require("dotenv").config();
 
 //DB
@@ -16,6 +17,8 @@ app.get("/", (req, res) => {
 
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
+
+app.use("/api", apiRoutes);
 
 const listener = app.listen(process.env.PORT || 3000, () => {
 	console.log("Your app is listening on port " + listener.address().port);
