@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User");
+const Exercise = require("../models/Exercise");
 
 // GET
 router.get("/users", async (req, res) => {
@@ -30,6 +31,7 @@ router.get("/users/:_id/logs", (req, res) => {
 router.post("/users", async (req, res) => {
 	// create new user
 	let user = await User.findOne({ username: req.body.username });
+	console.log(req.body);
 	if (user) {
 		return res.status(400).json({ error: "Username already taken" });
 	} else {
@@ -41,11 +43,40 @@ router.post("/users", async (req, res) => {
 	}
 });
 
-router.post("/users/:_id/exercises", (req, res) => {
+router.post("/users/:_id/exercises", async (req, res) => {
 	// create new exercise
+	const { description, duration, _id } = req.body;
+	console.log(req.body);
+	let user = null;
+	if (!_id) {
+		return res.status(404).json({ error: "Not found" });
+	} else {
+		user = await User.findOne({ _id });
+	}
+	if (!description || !duration) {
+		return res.status(400).json({ error: "Description and duration required" });
+	}
+	let date = req.body.date;
 	// if not date supplied, use current date
-	// returns user object with exercise added
-	res.json({ username: req.body.url, _id: 1 });
+	if (date === "") {
+		date = new Date().toISOString().substring(0, 10);
+	}
+	let exercise = new Exercise({
+		description,
+		duration,
+		date,
+	});
+	if (user && exercise) {
+		// returns user object with exercise added
+		const result = {
+			_id: user._id,
+			username: user.username,
+			date: exercise.date.toDateString(),
+			duration: exercise.duration,
+			description: exercise.description,
+		};
+		return res.json(result);
+	}
 });
 
 module.exports = router;
