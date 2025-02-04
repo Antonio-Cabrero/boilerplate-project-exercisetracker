@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const User = require("../models/User");
-const Exercise = require("../models/Exercise");
+const { User } = require("../models/User");
+const { Exercise } = require("../models/Exercise");
+const Log = require("../models/Log");
 
 // GET
 router.get("/users", async (req, res) => {
@@ -14,15 +15,6 @@ router.get("/users", async (req, res) => {
 
 router.get("/users/:_id", async (req, res) => {
 	// get user by id
-	let user = await User.findOne({ _id: req.query.id });
-	if (!user) {
-		return res.status(404).json({ error: "User not found" });
-	}
-	res.json({ username: user.username, _id: user._id });
-});
-
-router.get("/users/:_id/exercises", async (req, res) => {
-	// get exercises as array
 	let user = await User.findOne({ _id: req.query.id });
 	if (!user) {
 		return res.status(404).json({ error: "User not found" });
@@ -54,38 +46,57 @@ router.post("/users", async (req, res) => {
 router.post("/users/:_id/exercises", async (req, res) => {
 	// create new exercise
 	const { description, duration, _id } = req.body;
-	console.log(req.body);
-	let user = null;
+	let user;
 	if (!_id) {
 		return res.status(404).json({ error: "Not found" });
 	} else {
-		user = await User.findOne({ _id });
+		user = await User.findOne({ _id: _id });
 	}
 	if (!description || !duration) {
 		return res.status(400).json({ error: "Description and duration required" });
 	}
-	let date = req.body.date;
+	const date =
+		req.body.date !== ""
+			? new Date(req.body.date).toDateString()
+			: new Date().toDateString();
 	// if not date supplied, use current date
-	if (date === "") {
-		date = new Date().toISOString().substring(0, 10);
-	}
+
 	let exercise = new Exercise({
 		description,
 		duration,
 		date,
 	});
-	if (user && exercise) {
-		// returns user object with exercise added
-		const result = {
-			_id: user._id,
+	const logExercise = {
+		description,
+		duration,
+		date,
+	};
+
+	let userLogs = await Log.findOne({ _id: user._id });
+
+	if (!userLogs) {
+		userLogs = new Log({
 			username: user.username,
-			date: exercise.date.toDateString(),
-			duration: exercise.duration,
-			description: exercise.description,
-		};
-		await result.save();
-		return res.json(result);
+			count: 0,
+			_id: user._id,
+			log: [],
+		});
 	}
+	userLogs.count++;
+	userLogs.log.push(logExercise);
+	console.log(userLogs);
+	await userLogs.save();
+
+	// returns user object with exercise added
+
+	res.json({
+		username: user.username,
+		_id: user._id,
+		description: exercise.description,
+		duration: exercise.duration,
+		date: exercise.date,
+	});
+	// return res.json(exercise);
 });
 
 module.exports = router;
