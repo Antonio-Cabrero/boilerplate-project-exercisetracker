@@ -22,9 +22,18 @@ router.get("/users/:_id", async (req, res) => {
 	res.json({ username: user.username, _id: user._id });
 });
 
-router.get("/users/:_id/logs", (req, res) => {
+router.get("/users/:_id/logs", async (req, res) => {
 	// return the user object with a log array of all the exercises added.
-	res.json({ greeting: "hello API" });
+	let logs = await Log.findOne({ _id: req.query.id });
+	if (!logs) {
+		return res.status(404).json({ error: "No Logs for this user" });
+	}
+	res.json({
+		_id: logs._id,
+		username: logs.username,
+		count: logs.count,
+		log: logs.log,
+	});
 });
 
 // POST
@@ -84,7 +93,6 @@ router.post("/users/:_id/exercises", async (req, res) => {
 	}
 	userLogs.count++;
 	userLogs.log.push(logExercise);
-	console.log(userLogs);
 	await userLogs.save();
 
 	// returns user object with exercise added
