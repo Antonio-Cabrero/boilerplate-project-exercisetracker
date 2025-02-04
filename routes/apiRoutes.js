@@ -21,9 +21,13 @@ router.get("/users/:_id", async (req, res) => {
 	res.json({ username: user.username, _id: user._id });
 });
 
-router.get("/users/:_id/exercises", (req, res) => {
+router.get("/users/:_id/exercises", async (req, res) => {
 	// get exercises as array
-	res.json({ greeting: "hello API" });
+	let user = await User.findOne({ _id: req.query.id });
+	if (!user) {
+		return res.status(404).json({ error: "User not found" });
+	}
+	res.json({ username: user.username, _id: user._id });
 });
 
 router.get("/users/:_id/logs", (req, res) => {
@@ -79,6 +83,7 @@ router.post("/users/:_id/exercises", async (req, res) => {
 			duration: exercise.duration,
 			description: exercise.description,
 		};
+		await result.save();
 		return res.json(result);
 	}
 });
