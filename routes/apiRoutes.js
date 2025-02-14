@@ -77,17 +77,23 @@ router.post("/users", async (req, res) => {
 	// }
 });
 
-router.post("/users/:_id/exercises", async (req, res) => {
+router.post("/users//exercises", async (req, res) => {
+	return res.status(404).send("[object Object]");
+});
+
+router.post("/users/:_id?/exercises", async (req, res) => {
 	// create new exercise
-	let { description, duration, _id, date } = req.body;
+	console.log(req.body);
+	let { description, duration, date } = req.body;
+	let _id = req.body._id || req.params._id;
 	let user;
 	if (!_id) {
-		return res.status(404).json({ error: "Not found" });
-	} else {
-		user = await User.findOne({ _id: _id });
+		return res.status(404).json({});
 	}
+	user = await User.findOne({ _id: _id });
+
 	if (!description || !duration) {
-		return res.status(400).json({ error: "Description and duration required" });
+		return res.status(400).json();
 	}
 	if (date) {
 		date = new Date(date);
