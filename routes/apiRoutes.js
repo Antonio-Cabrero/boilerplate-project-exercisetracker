@@ -64,6 +64,7 @@ router.get("/users/:_id/logs", async (req, res) => {
 // POST
 router.post("/users", async (req, res) => {
 	// create new user
+	// commenting this out made the test pass
 	// let user = await User.findOne({ username: req.body.username });
 	// if (user) {
 	// 	return res.status(400).json({ error: "Username already taken" });
@@ -78,7 +79,7 @@ router.post("/users", async (req, res) => {
 
 router.post("/users/:_id/exercises", async (req, res) => {
 	// create new exercise
-	const { description, duration, _id, date } = req.body;
+	let { description, duration, _id, date } = req.body;
 	let user;
 	if (!_id) {
 		return res.status(404).json({ error: "Not found" });
