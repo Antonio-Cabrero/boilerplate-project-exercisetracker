@@ -65,7 +65,6 @@ router.get("/users/:_id/logs", async (req, res) => {
 router.post("/users", async (req, res) => {
 	// create new user
 	let user = await User.findOne({ username: req.body.username });
-	console.log(req.body);
 	if (user) {
 		return res.status(400).json({ error: "Username already taken" });
 	} else {
@@ -79,8 +78,7 @@ router.post("/users", async (req, res) => {
 
 router.post("/users/:_id/exercises", async (req, res) => {
 	// create new exercise
-	console.log(req);
-	const { description, duration, _id } = req.body;
+	const { description, duration, _id, date } = req.body;
 	let user;
 	if (!_id) {
 		return res.status(404).json({ error: "Not found" });
@@ -90,7 +88,11 @@ router.post("/users/:_id/exercises", async (req, res) => {
 	if (!description || !duration) {
 		return res.status(400).json({ error: "Description and duration required" });
 	}
-	const date = req.body.date !== "" ? new Date(req.body.date) : new Date();
+	if (date) {
+		date = new Date(date);
+	} else {
+		date = new Date();
+	}
 	// if not date supplied, use current date
 
 	const logExercise = {
@@ -120,7 +122,7 @@ router.post("/users/:_id/exercises", async (req, res) => {
 		_id: user._id,
 		description: description,
 		duration: duration,
-		date: new Date(date).toDateString(),
+		date: date.toDateString(),
 	});
 	// return res.json(exercise);
 });
