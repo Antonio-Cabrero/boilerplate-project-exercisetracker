@@ -125,8 +125,8 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	// returns user object with exercise added
 
 	res.json({
-		username: user.username,
 		_id: user._id,
+		username: user.username,
 		description: description,
 		duration: duration,
 		date: date.toDateString(),
