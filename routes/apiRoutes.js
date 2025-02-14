@@ -26,8 +26,8 @@ router.get("/users/:_id/logs", async (req, res) => {
 	// return the user object with a log array of all the exercises added.
 	let userLogs;
 	const { from, to, limit } = req.query;
-	const fromDate = new Date(from);
-	const toDate = new Date(to);
+	let fromDate = new Date(from);
+	let toDate = new Date(to);
 	const query = { _id: req.params._id };
 
 	if (from) {
@@ -52,11 +52,13 @@ router.get("/users/:_id/logs", async (req, res) => {
 	}
 
 	if (from && to) {
+		fromDate = fromDate.toDateString();
+		toDate = toDate.toDateString();
 		res.json({
 			_id: userLogs._id,
 			username: userLogs.username,
-			from: fromDate.toDateString(),
-			to: toDate.toDateString(),
+			from: fromDate,
+			to: toDate,
 			count: userLogs.count,
 			log: logs,
 		});
@@ -105,16 +107,19 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 		return res.status(400).json();
 	}
 	if (date) {
-		date = new Date(date);
+		date = new Date(date).toDateString();
+		if (isNaN(date.getTime())) {
+			return res.status(400).json({ error: "Invalid date format" });
+		}
 	} else {
-		date = new Date();
+		date = new Date().toDateString();
 	}
 	// if not date supplied, use current date
 
 	const logExercise = {
 		description,
 		duration,
-		date: date.toDateString(),
+		date,
 	};
 
 	let userLogs = await Log.findOne({ _id: user._id });
@@ -136,7 +141,7 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	res.json({
 		_id: user._id,
 		username: user.username,
-		date: date.toDateString(),
+		date: date,
 		duration: Number(duration),
 		description: description,
 	});
