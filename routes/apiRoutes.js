@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User } = require("../models/User");
+const User = require("../models/User");
 const { Exercise } = require("../models/Exercise");
 const Log = require("../models/Log");
 
@@ -15,7 +15,7 @@ router.get("/users", async (req, res) => {
 
 router.get("/users/:_id", async (req, res) => {
 	// get user by id
-	let user = await User.findOne({ _id: req.query.id });
+	let user = await User.findOne({ _id: req.params._id });
 	if (!user) {
 		return res.status(404).json({ error: "User not found" });
 	}
@@ -24,15 +24,40 @@ router.get("/users/:_id", async (req, res) => {
 
 router.get("/users/:_id/logs", async (req, res) => {
 	// return the user object with a log array of all the exercises added.
-	let logs = await Log.findOne({ _id: req.query.id });
-	if (!logs) {
-		return res.status(404).json({ error: "No Logs for this user" });
+	let userLogs;
+	const { from, to, limit } = req.query;
+	const fromDate = new Date(from);
+	const toDate = new Date(to);
+	const query = { _id: req.params._id };
+
+	if (from) {
+		query["log.date"] = { $gte: fromDate };
 	}
+	if (to) {
+		query["log.date"] = query["log.date"] || {};
+		query["log.date"] = { $lte: toDate };
+	}
+
+	userLogs = await Log.findOne(query).select("log count username _id");
+
+	if (!userLogs === null || userLogs.log.length === 0) {
+		return res
+			.status(404)
+			.json({ error: "Nothing found within the time period" });
+	}
+
+	let logs = userLogs.log;
+	if (limit) {
+		logs = logs.slice(0, limit);
+	}
+
 	res.json({
-		_id: logs._id,
-		username: logs.username,
-		count: logs.count,
-		log: logs.log,
+		_id: userLogs._id,
+		username: userLogs.username,
+		from: from ? fromDate.toDateString() : undefined,
+		to: to ? toDate.toDateString() : undefined,
+		count: userLogs.count,
+		log: logs,
 	});
 });
 
@@ -54,6 +79,7 @@ router.post("/users", async (req, res) => {
 
 router.post("/users/:_id/exercises", async (req, res) => {
 	// create new exercise
+	console.log(req);
 	const { description, duration, _id } = req.body;
 	let user;
 	if (!_id) {
@@ -64,17 +90,9 @@ router.post("/users/:_id/exercises", async (req, res) => {
 	if (!description || !duration) {
 		return res.status(400).json({ error: "Description and duration required" });
 	}
-	const date =
-		req.body.date !== ""
-			? new Date(req.body.date).toDateString()
-			: new Date().toDateString();
+	const date = req.body.date !== "" ? new Date(req.body.date) : new Date();
 	// if not date supplied, use current date
 
-	let exercise = new Exercise({
-		description,
-		duration,
-		date,
-	});
 	const logExercise = {
 		description,
 		duration,
@@ -100,9 +118,9 @@ router.post("/users/:_id/exercises", async (req, res) => {
 	res.json({
 		username: user.username,
 		_id: user._id,
-		description: exercise.description,
-		duration: exercise.duration,
-		date: exercise.date,
+		description: description,
+		duration: duration,
+		date: new Date(date).toDateString(),
 	});
 	// return res.json(exercise);
 });
