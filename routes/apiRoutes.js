@@ -54,8 +54,8 @@ router.get("/users/:_id/logs", async (req, res) => {
 	res.json({
 		_id: userLogs._id,
 		username: userLogs.username,
-		from: from ? fromDate.toDateString() : undefined,
-		to: to ? toDate.toDateString() : undefined,
+		from: fromDate.toDateString(),
+		to: toDate.toDateString(),
 		count: userLogs.count,
 		log: logs,
 	});
