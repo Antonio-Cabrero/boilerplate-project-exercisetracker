@@ -105,7 +105,7 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	const logExercise = {
 		description,
 		duration,
-		date,
+		date: date.toDateString(),
 	};
 
 	let userLogs = await Log.findOne({ _id: user._id });
