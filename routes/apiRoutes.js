@@ -51,14 +51,23 @@ router.get("/users/:_id/logs", async (req, res) => {
 		logs = logs.slice(0, limit);
 	}
 
-	res.json({
-		_id: userLogs._id,
-		username: userLogs.username,
-		from: fromDate.toDateString(),
-		to: toDate.toDateString(),
-		count: userLogs.count,
-		log: logs,
-	});
+	if (from && to) {
+		res.json({
+			_id: userLogs._id,
+			username: userLogs.username,
+			from: fromDate.toDateString(),
+			to: toDate.toDateString(),
+			count: userLogs.count,
+			log: logs,
+		});
+	} else {
+		res.json({
+			_id: userLogs._id,
+			username: userLogs.username,
+			count: userLogs.count,
+			log: logs,
+		});
+	}
 });
 
 // POST
