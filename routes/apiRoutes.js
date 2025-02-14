@@ -127,9 +127,9 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	res.json({
 		_id: user._id,
 		username: user.username,
-		description: description,
-		duration: duration,
 		date: date.toDateString(),
+		duration: Number(duration),
+		description: description,
 	});
 	// return res.json(exercise);
 });
