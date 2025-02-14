@@ -30,6 +30,17 @@ router.get("/users/:_id/logs", async (req, res) => {
 	let toDate = new Date(to);
 	const query = { _id: req.params._id };
 
+	if (!from && !to) {
+		userLogs = await Log.findOne(query);
+
+		res.json({
+			_id: userLogs._id,
+			username: userLogs.username,
+			count: userLogs.count,
+			log: userLogs.log,
+		});
+	}
+
 	if (from) {
 		query["log.date"] = { $gte: fromDate };
 	}
@@ -40,7 +51,7 @@ router.get("/users/:_id/logs", async (req, res) => {
 
 	userLogs = await Log.findOne(query).select("log count username _id");
 
-	if (!userLogs === null || userLogs.log.length === 0) {
+	if (!userLogs || userLogs.log.length === 0) {
 		return res
 			.status(404)
 			.json({ error: "Nothing found within the time period" });
@@ -59,13 +70,6 @@ router.get("/users/:_id/logs", async (req, res) => {
 			username: userLogs.username,
 			from: fromDate,
 			to: toDate,
-			count: userLogs.count,
-			log: logs,
-		});
-	} else {
-		res.json({
-			_id: userLogs._id,
-			username: userLogs.username,
 			count: userLogs.count,
 			log: logs,
 		});
