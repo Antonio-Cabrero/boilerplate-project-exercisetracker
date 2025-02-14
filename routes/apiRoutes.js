@@ -64,16 +64,16 @@ router.get("/users/:_id/logs", async (req, res) => {
 // POST
 router.post("/users", async (req, res) => {
 	// create new user
-	let user = await User.findOne({ username: req.body.username });
-	if (user) {
-		return res.status(400).json({ error: "Username already taken" });
-	} else {
-		user = new User({
-			username: req.body.username,
-		});
-		await user.save();
-		res.json({ username: user.username, _id: user._id });
-	}
+	// let user = await User.findOne({ username: req.body.username });
+	// if (user) {
+	// 	return res.status(400).json({ error: "Username already taken" });
+	// } else {
+	user = new User({
+		username: req.body.username,
+	});
+	await user.save();
+	res.json({ username: user.username, _id: user._id });
+	// }
 });
 
 router.post("/users/:_id/exercises", async (req, res) => {
