@@ -55,27 +55,25 @@ router.get("/users/:_id/logs", async (req, res) => {
 			(e) =>
 				new Date(e.date) >= new Date(from) && new Date(e.date) <= new Date(to)
 		);
-	}
 
-	logs = logs.map((log) => {
-		return {
-			description: log.description,
-			duration: log.duration,
-			date: new Date(log.date).toDateString(),
-		};
-	});
+		if (!logs || logs.length === 0) {
+			return res
+				.status(404)
+				.json({ error: "Nothing found within the time period" });
+		}
 
-	if (!logs || logs.length === 0) {
-		return res
-			.status(404)
-			.json({ error: "Nothing found within the time period" });
-	}
+		logs = logs.map((log) => {
+			return {
+				description: log.description,
+				duration: log.duration,
+				date: new Date(log.date).toDateString(),
+			};
+		});
 
-	if (limit) {
-		logs = logs.splice(0, parseFloat(limit));
-	}
+		if (limit) {
+			logs = logs.splice(0, parseFloat(limit));
+		}
 
-	if (from && to) {
 		res.json({
 			username: userLogs.username,
 			count: userLogs.count,
