@@ -41,23 +41,37 @@ router.get("/users/:_id/logs", async (req, res) => {
 		});
 	}
 
-	if (from) {
-		query["log.date"] = { $gte: fromDate };
-	}
-	if (to) {
-		query["log.date"] = query["log.date"] || {};
-		query["log.date"] = { $lte: toDate };
-	}
+	// if (from) {
+	// 	query["log.date"] = { $gte: fromDate };
+	// }
+	// if (to) {
+	// 	query["log.date"] = query["log.date"] || {};
+	// 	query["log.date"] = { $lte: toDate };
+	// }
 
 	userLogs = await Log.findOne(query).select("log count username _id");
+	let logs = userLogs.log;
 
-	if (!userLogs || userLogs.log.length === 0) {
+	logs = logs.map((log) => {
+		return {
+			description: log.description,
+			duration: log.duration,
+			date: log.date,
+		};
+	});
+
+	if (!logs || logs.length === 0) {
 		return res
 			.status(404)
 			.json({ error: "Nothing found within the time period" });
 	}
 
-	let logs = userLogs.log;
+	if (from && to) {
+		logs = logs.filter((log) => {
+			let logDate = new Date(log.date);
+			return logDate >= fromDate && logDate <= toDate;
+		});
+	}
 	if (limit) {
 		logs = logs.slice(0, limit);
 	}
