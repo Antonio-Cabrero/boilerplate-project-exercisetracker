@@ -111,7 +111,6 @@ router.post("/users//exercises", async (req, res) => {
 
 router.post("/users/:_id?/exercises", async (req, res) => {
 	// create new exercise
-	console.log(req.body);
 	let { description, duration, date } = req.body;
 	let _id = req.body._id || req.params._id;
 	let user;
@@ -124,12 +123,12 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 		return res.status(400).json();
 	}
 	if (date) {
-		date = new Date(date).toDateString();
+		date = new Date(date).toISOString();
 		// if (isNaN(date.getTime())) {
 		// 	return res.status(400).json({ error: "Invalid date format" });
 		// }
 	} else {
-		date = new Date().toDateString();
+		date = new Date().toISOString();
 	}
 	// if not date supplied, use current date
 
@@ -158,7 +157,7 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	res.json({
 		_id: user._id,
 		username: user.username,
-		date: date,
+		date: new Date(date).toDateString(),
 		duration: Number(duration),
 		description: description,
 	});
