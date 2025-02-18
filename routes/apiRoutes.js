@@ -26,16 +26,14 @@ router.get("/users/:_id/logs", async (req, res) => {
 	// return the user object with a log array of all the exercises added.
 	let userLogs;
 	const { from, to, limit } = req.query;
-	let fromDate = new Date(from);
-	let toDate = new Date(to);
 	const query = { _id: req.params._id };
 
 	if (!from && !to) {
 		userLogs = await Log.findOne(query);
 
 		res.json({
-			_id: userLogs._id,
 			username: userLogs.username,
+			_id: userLogs._id,
 			count: userLogs.count,
 			log: userLogs.log,
 		});
@@ -67,24 +65,23 @@ router.get("/users/:_id/logs", async (req, res) => {
 	}
 
 	if (from && to) {
-		logs = logs.filter((log) => {
-			let logDate = new Date(log.date);
-			return logDate >= fromDate && logDate <= toDate;
-		});
+		logs = logs.filter(
+			(log) =>
+				new Date(log.date) >= new Date(from) &&
+				new Date(log.date) <= new Date(to)
+		);
 	}
 	if (limit) {
-		logs = logs.slice(0, limit);
+		logs = logs.splice(0, Number(limit));
 	}
 
 	if (from && to) {
-		fromDate = fromDate.toDateString();
-		toDate = toDate.toDateString();
 		res.json({
-			_id: userLogs._id,
 			username: userLogs.username,
-			from: fromDate,
-			to: toDate,
 			count: userLogs.count,
+			_id: userLogs._id,
+			// from: fromDate,
+			// to: toDate,s
 			log: logs,
 		});
 	}
