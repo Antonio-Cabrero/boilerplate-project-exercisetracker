@@ -118,13 +118,10 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	if (!description || !duration) {
 		return res.status(400).json();
 	}
-	if (date) {
-		date = new Date(date).toISOString();
-		// if (isNaN(date.getTime())) {
-		// 	return res.status(400).json({ error: "Invalid date format" });
-		// }
-	} else {
+	if (!date) {
 		date = new Date().toISOString();
+	} else {
+		date = new Date(date).toISOString();
 	}
 	// if not date supplied, use current date
 
