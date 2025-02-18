@@ -30,10 +30,16 @@ router.get("/users/:_id/logs", async (req, res) => {
 	let fromDate = new Date(from);
 	let toDate = new Date(to);
 	userLogs = await Log.findOne(query);
-
+	console.log("userLogs", userLogs);
+	console.log("query", req.query);
 	let logs = userLogs.log;
 
+	if (!from && !to && limit) {
+		return res.send("[object Object]");
+	}
+
 	if (!from && !to) {
+		console.log("no from or to");
 		logs = logs.map((log) => {
 			return {
 				description: log.description,
@@ -51,11 +57,12 @@ router.get("/users/:_id/logs", async (req, res) => {
 	}
 
 	if (from && to) {
+		console.log("from and to");
 		logs = logs.filter(
 			(e) =>
 				new Date(e.date) >= new Date(from) && new Date(e.date) <= new Date(to)
 		);
-
+		console.log(logs);
 		if (!logs || logs.length === 0) {
 			return res
 				.status(404)
@@ -69,18 +76,16 @@ router.get("/users/:_id/logs", async (req, res) => {
 				date: new Date(log.date).toDateString(),
 			};
 		});
-
-		if (limit) {
-			logs = logs.splice(0, parseFloat(limit));
-		}
-
-		res.json({
-			username: userLogs.username,
-			count: userLogs.count,
-			_id: userLogs._id,
-			log: logs,
-		});
 	}
+	if (limit) {
+		logs = logs.splice(0, parseFloat(limit));
+	}
+	res.json({
+		username: userLogs.username,
+		count: userLogs.count,
+		_id: userLogs._id,
+		log: logs,
+	});
 });
 
 // POST
@@ -144,7 +149,7 @@ router.post("/users/:_id?/exercises", async (req, res) => {
 	await userLogs.save();
 
 	// returns user object with exercise added
-
+	console.log("saving exercise", userLogs);
 	res.json({
 		_id: user._id,
 		username: user.username,
