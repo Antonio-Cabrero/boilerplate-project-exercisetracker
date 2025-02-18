@@ -29,11 +29,11 @@ router.get("/users/:_id/logs", async (req, res) => {
 	const query = { _id: req.params._id };
 	let fromDate = new Date(from);
 	let toDate = new Date(to);
-	let logs;
+	userLogs = await Log.findOne(query);
+
+	let logs = userLogs.log;
 
 	if (!from && !to) {
-		userLogs = await Log.findOne(query);
-		logs = userLogs.log;
 		logs = logs.map((log) => {
 			return {
 				description: log.description,
@@ -51,11 +51,11 @@ router.get("/users/:_id/logs", async (req, res) => {
 	}
 
 	if (from && to) {
-		query["log.date"] = { $gte: fromDate, $lte: toDate };
+		logs = logs.filter(
+			(e) =>
+				new Date(e.date) >= new Date(from) && new Date(e.date) <= new Date(to)
+		);
 	}
-
-	userLogs = await Log.findOne(query).select("log count username _id");
-	logs = userLogs.log;
 
 	logs = logs.map((log) => {
 		return {
