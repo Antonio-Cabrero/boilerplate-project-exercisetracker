@@ -29,15 +29,24 @@ router.get("/users/:_id/logs", async (req, res) => {
 	const query = { _id: req.params._id };
 	let fromDate = new Date(from);
 	let toDate = new Date(to);
+	let logs;
 
 	if (!from && !to) {
 		userLogs = await Log.findOne(query);
+		logs = userLogs.log;
+		logs = logs.map((log) => {
+			return {
+				description: log.description,
+				duration: log.duration,
+				date: new Date(log.date).toDateString(),
+			};
+		});
 
-		res.json({
+		return res.json({
 			username: userLogs.username,
-			_id: userLogs._id,
 			count: userLogs.count,
-			log: userLogs.log,
+			_id: userLogs._id,
+			log: logs,
 		});
 	}
 
@@ -46,13 +55,13 @@ router.get("/users/:_id/logs", async (req, res) => {
 	}
 
 	userLogs = await Log.findOne(query).select("log count username _id");
-	let logs = userLogs.log;
+	logs = userLogs.log;
 
 	logs = logs.map((log) => {
 		return {
 			description: log.description,
 			duration: log.duration,
-			date: log.date,
+			date: new Date(log.date).toDateString(),
 		};
 	});
 
@@ -62,13 +71,6 @@ router.get("/users/:_id/logs", async (req, res) => {
 			.json({ error: "Nothing found within the time period" });
 	}
 
-	// if (from && to) {
-	// 	logs = logs.filter(
-	// 		(log) =>
-	// 			new Date(log.date) >= new Date(from) &&
-	// 			new Date(log.date) <= new Date(to)
-	// 	);
-	// }
 	if (limit) {
 		logs = logs.splice(0, parseFloat(limit));
 	}
@@ -78,8 +80,6 @@ router.get("/users/:_id/logs", async (req, res) => {
 			username: userLogs.username,
 			count: userLogs.count,
 			_id: userLogs._id,
-			// from: fromDate,
-			// to: toDate,s
 			log: logs,
 		});
 	}
