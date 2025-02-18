@@ -34,12 +34,8 @@ router.get("/users/:_id/logs", async (req, res) => {
 	console.log("query", req.query);
 	let logs = userLogs.log;
 
-	if (!from && !to && limit) {
-		return res.send("[object Object]");
-	}
-
-	if (!from && !to) {
-		console.log("no from or to");
+	if (logs) {
+		//format logs
 		logs = logs.map((log) => {
 			return {
 				description: log.description,
@@ -47,6 +43,20 @@ router.get("/users/:_id/logs", async (req, res) => {
 				date: new Date(log.date).toDateString(),
 			};
 		});
+	}
+
+	if (!from && !to && limit) {
+		logs = logs.splice(0, parseFloat(limit));
+		return res.json({
+			username: userLogs.username,
+			count: userLogs.count,
+			_id: userLogs._id,
+			log: logs,
+		});
+	}
+
+	if (!from && !to) {
+		console.log("no from or to");
 
 		return res.json({
 			username: userLogs.username,
@@ -69,23 +79,16 @@ router.get("/users/:_id/logs", async (req, res) => {
 				.json({ error: "Nothing found within the time period" });
 		}
 
-		logs = logs.map((log) => {
-			return {
-				description: log.description,
-				duration: log.duration,
-				date: new Date(log.date).toDateString(),
-			};
+		if (limit) {
+			logs = logs.splice(0, parseFloat(limit));
+		}
+		return res.json({
+			username: userLogs.username,
+			count: userLogs.count,
+			_id: userLogs._id,
+			log: logs,
 		});
 	}
-	if (limit) {
-		logs = logs.splice(0, parseFloat(limit));
-	}
-	res.json({
-		username: userLogs.username,
-		count: userLogs.count,
-		_id: userLogs._id,
-		log: logs,
-	});
 });
 
 // POST
