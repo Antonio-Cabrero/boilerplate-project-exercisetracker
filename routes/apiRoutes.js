@@ -41,12 +41,8 @@ router.get("/users/:_id/logs", async (req, res) => {
 		});
 	}
 
-	if (from) {
-		query["log.date"] = { $gte: fromDate };
-	}
-	if (to) {
-		query["log.date"] = query["log.date"] || {};
-		query["log.date"] = { $lte: toDate };
+	if (from && to) {
+		query["log.date"] = { $gte: fromDate, $lte: toDate };
 	}
 
 	userLogs = await Log.findOne(query).select("log count username _id");
@@ -74,7 +70,7 @@ router.get("/users/:_id/logs", async (req, res) => {
 	// 	);
 	// }
 	if (limit) {
-		logs = logs.splice(0, Number(limit));
+		logs = logs.splice(0, parseFloat(limit));
 	}
 
 	if (from && to) {
